@@ -1,6 +1,6 @@
 # run with
-#./iceplaice -ind  iceplaice.dat.opt  -nox
-#./iceplaice -ind iceplaice.dat.opt -nox -mcmc 100000 -mcsave 200 -mcscale
+#./muppet -ind iceplaice.dat.opt  -nox
+#./muppet -ind iceplaice.dat.opt -nox -mcmc 100000 -mcsave 200 -mcscale
 
 ../Files/catchandstockdata.dat  # Data on the stock mean weight, maturity etc.
 ../Files/totcatch.dat # Total catch
