@@ -177,9 +177,13 @@ rbx <-
 And plot the summary results via:
 ```{r}
 library(tidyverse)
-rbx$rby %>% 
-  select(year, rec = r, bio, ssb, fbar, hr, oY) %>% 
-  gather(variable, value, -year) %>% 
+rby <- 
+  rbx$rby %>% 
+  mutate(oY = ifelse(is.na(oY), pY, oY)) %>% 
+  select(year, rec = r, bio, ssb, fbar, hr, catch = oY) %>% 
+  gather(variable, value, -year)
+
+rby %>% 
   ggplot(aes(year, value)) +
   geom_line() +
   facet_wrap(~ variable, scale = "free_y") +
@@ -234,11 +238,12 @@ d <-
 d %>% 
   ggplot(aes(year)) +
   facet_grid(variable ~ ., scale = "free_y") +
-  geom_vline(xintercept = 2017.5, colour = "grey") +
+  geom_vline(xintercept = 2018, colour = "grey") +
   geom_ribbon(aes(ymin = q05, ymax = q95), fill = "red", alpha = 0.1) +
   geom_ribbon(aes(ymin = q10, ymax = q90), fill = "red", alpha = 0.2) +
   geom_ribbon(aes(ymin = q25, ymax = q95), fill = "red", alpha = 0.4) +
   geom_line(aes(y = q50), colour = "red") +
+  geom_line(data = rby, aes(year, value)) +
   expand_limits(y = 0) +
   labs(x = NULL, y = NULL)
 ```
@@ -308,8 +313,9 @@ load("0Base/HCRrun.rda")
 d <-
   alldata %>%
   as_tibble() %>%
+  mutate(hr2 = catch/refbio1) %>% 
   select(hr, Btrigger, year,
-         catch, ssb, rec, fbar = refF, bio = refbio1) %>%
+         catch, ssb, rec, fbar = refF, hr2, bio = refbio1) %>%
   mutate(rec = rec / 1000) %>%
   gather(variable, value, -c(hr, Btrigger, year)) %>%
   group_by(hr, Btrigger, year, variable) %>%
@@ -320,7 +326,7 @@ d %>%
   filter(hr %in% c(0.1, 0.15, 0.20, 0.25, 0.30)) %>% 
   ggplot(aes(year)) +
   theme_bw() +
-  geom_vline(xintercept = 2018.5, colour = "grey") +
+  geom_vline(xintercept = 2018, colour = "grey") +
   geom_ribbon(aes(ymin = q05, ymax = q95),
               fill = "red", alpha = 0.2) +
   geom_ribbon(aes(ymin = q10, ymax = q90),
