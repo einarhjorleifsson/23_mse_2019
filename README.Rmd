@@ -265,8 +265,6 @@ pars <-
               mW.years = 10)
 cn <- names(pars)
 
-
-
 setwd("0Base")
 res <- list()
 for(i in 1:nrow(pars)) {
@@ -297,8 +295,8 @@ sumdata <-
   ungroup()
 HCRsettings <- readLines(ctrlfile)
 
-save(list=c("HCRsettings","alldata","sumdata"), file = "HCRrun.rdata")
-save(list=c("HCRsettings","sumdata"), file = "HCRrunsum.rdata")
+save(list=c("HCRsettings","alldata","sumdata"), file = "HCRrun.rda")
+save(list=c("HCRsettings","sumdata"), file = "HCRrunsum.rda")
 
 setwd(basedir)
 ```
@@ -306,7 +304,7 @@ setwd(basedir)
 ## Some results
 
 ```{r, fig.heigth = 9}
-load("0Base/HCRrun.rdata")
+load("0Base/HCRrun.rda")
 d <-
   alldata %>%
   as_tibble() %>%
