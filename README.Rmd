@@ -1,0 +1,381 @@
+---
+title: "Setup"
+subtitle: "Experimentation with workflow"
+author: "Einar Hjörleifsson"
+date: "2018-11-09"
+output: 
+  html_document: 
+    fig_height: 6
+    fig_width: 9
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, eval = TRUE)
+```
+
+## Cloning Muppet_HCR
+
+The admb-source code and some templates for setups for plaice and haddock are available in [Husky's github repo](https://github.com/hoski/Muppet_HCR). The easiest way to get this on your computer is via the following command in a terminal window:
+
+```{sh, eval = FALSE}
+git clone https://github.com/hoski/Muppet_HCR.git
+```
+
+I suggest that you do the above from within your working directory where you intend to do you own simulation. Once cloned, you have the following content in the `Muppet_HCR`-directory:
+```
+Muppet_HCR/
+├── HCR
+│   ├── Had
+│   │   ├── Files
+│   │   │   ├── autsurveydata.dat
+│   │   │   ├── autsurveypar.dat
+│   │   │   ├── catchandstockdata.dat
+│   │   │   ├── catchparameters.dat
+│   │   │   ├── hadprognosis.dat.biorule
+│   │   │   ├── hadprognosis.dat.bioruleAge
+│   │   │   ├── hadprognosis.dat.opt
+│   │   │   ├── likelihoodparameters.dat
+│   │   │   ├── marsurveydata.dat
+│   │   │   ├── marsurveypar.dat
+│   │   │   ├── optim.dat.hockey
+│   │   │   ├── outputparameters.dat
+│   │   │   ├── ProgWts.dat
+│   │   │   ├── ReadHad.r
+│   │   │   └── stockparameters.dat
+│   │   └── StdSettings
+│   │       ├── icehad.dat.opt
+│   │       └── icehad.dat.prog
+│   ├── Model
+│   │   ├── muppet.tpl
+│   │   ├── readallmcmc.r
+│   │   └── Read.r
+│   └── Plaice
+│       ├── Files
+│       │   ├── catchandstockdata.dat
+│       │   ├── catchparameters.dat
+│       │   ├── likelihoodparameters.dat
+│       │   ├── optim.dat.hockey
+│       │   ├── outputparameters.dat
+│       │   ├── plaiceprognosis.dat.biorule
+│       │   ├── plaiceprognosis.dat.Frule
+│       │   ├── plaiceprognosis.dat.opt
+│       │   ├── ReadPlaice.r
+│       │   ├── stockparameters.dat
+│       │   ├── surveydata.dat
+│       │   ├── surveypar.dat
+│       │   └── totcatch.txt
+│       ├── HockeyEstAcf
+│       │   ├── iceplaice.dat.opt
+│       │   └── iceplaice.dat.prog
+│       └── README
+└── README.md
+```
+
+The key directory is 'HCR/Model' that contains the ad-model builder code in the muppet.tpl file. Then there are starting templates for two stocks, 'HCR/Haddock' and 
+'HCR/Plaice'. Now we do not want to do our simulaton work in the Muppet_HCR directory, treat it just as a copy of the latest version of Husky's admb-code for doing the simultions.
+
+## Setting up an MSE-evaluation
+
+What follows is a work-flow example on how to seed an mse-evaluation within ones working directory, here taking the plaice as an example. The example directory here is called `23_mse_2019`, where we have the following content:
+
+```
+23_mse_2019
+├── 23_mse_2019.Rproj
+├── Muppet_HCR
+├──  ... see above
+├── README.html
+├── README.Rmd
+├── run.sh
+└── setup.sh
+```
+
+Note that above we have the cloned `Muppet_HCR`-directory within our mse-directory. It can though be anywhere on your computer, one would only need to change the path in the shell-scripts below accordingly.
+
+We want to start off my copying the Model-directory and the Plaice setup-directories. Here it is done by running the following shell-commands:
+
+```{sh, eval = FALSE}
+cp -rp Muppet_HCR/HCR/Model .
+cp -rp Muppet_HCR/HCR/Plaice/Files .
+cp -rp Muppet_HCR/HCR/Plaice/HockeyEstAcf 0Base
+```
+
+The next step is to compile the admb-code from within the Model directory we just copied and then do some household cleaning of intermediate files:
+```{sh, eval = FALSE}
+cd Model
+admb muppet
+rm muppet.cpp
+rm muppet.htp
+rm muppet.obj
+cd ..
+```
+
+Move the compiled admb-program into the 0Base-directory:
+```{sh, eval = FALSE}
+cp -p Model/muppet 0Base/.
+```
+
+If you are going to test a harvest-rate rule copy the biorule template into the base-directory:
+```{sh, eval = FALSE}
+cp -p Files/plaiceprognosis.dat.biorule 0Base/plaiceprognosis.dat
+```
+
+The directory structure within your project directory now looks something like this:
+```
+23_mse_2019
+├── 0Base
+│   ├── iceplaice.dat.opt
+│   ├── iceplaice.dat.prog
+│   ├── muppet
+│   └── plaiceprognosis.dat
+├── 23_mse_2019.Rproj
+├── Files
+│   ├── catchandstockdata.dat
+│   ├── catchparameters.dat
+│   ├── likelihoodparameters.dat
+│   ├── optim.dat.hockey
+│   ├── outputparameters.dat
+│   ├── plaiceprognosis.dat.biorule
+│   ├── plaiceprognosis.dat.Frule
+│   ├── plaiceprognosis.dat.opt
+│   ├── ReadPlaice.r
+│   ├── stockparameters.dat
+│   ├── surveydata.dat
+│   ├── surveypar.dat
+│   └── totcatch.txt
+├── Model
+│   ├── muppet
+│   ├── muppet.tpl
+│   ├── readallmcmc.r
+│   └── Read.r
+├── Muppet_HCR
+├──      ... not printed, see above
+├── README.html
+├── README.Rmd
+├── run.sh
+└── setup.sh
+```
+
+The above steps you can expect to do only once in every mse-evaluation cycle.
+
+## Running an assessment
+
+The muppet-program is in a nutshell both a "historical" assessment program with an objective function and a short and long term prognosis program. If we are only interested in an assessment we can simply do: 
+```{r}
+basedir <- getwd()
+setwd("0Base")
+system("./muppet -ind iceplaice.dat.opt  -nox")
+setwd(basedir)
+```
+
+We can read the deterministic results via:
+```{r}
+rbx <- 
+  fishvice::read_separ("0Base", ".")
+```
+
+And plot the summary results via:
+```{r}
+library(tidyverse)
+rbx$rby %>% 
+  select(year, rec = r, bio, ssb, fbar, hr, oY) %>% 
+  gather(variable, value, -year) %>% 
+  ggplot(aes(year, value)) +
+  geom_line() +
+  facet_wrap(~ variable, scale = "free_y") +
+  expand_limits(y = 0) +
+  geom_vline(xintercept = 2018.5) +
+  labs(x = NULL, y = NULL)
+```
+
+The residuals are visualized via:
+```{r, fig.height = 9}
+rbx$rbya %>% 
+  select(year, age, rC, rU1) %>% 
+  gather(variable, value, -c(year, age)) %>% 
+  ggplot(aes(year, value)) +
+  geom_col() +
+  facet_grid(age ~ variable)
+```
+
+## Running the simulations
+
+### Seeding some mcmc-runs
+
+Lets do some limited runs of 100 thousands, saving every 200 iteration and hence ending up with 500 iterations:
+```{r}
+setwd("0Base")
+system("./muppet -ind iceplaice.dat.opt -nox -mcmc 100000 -mcsave 200 -mcscale")
+# create the mcmc files
+system("./muppet -mceval -ind iceplaice.dat.prog")
+setwd(basedir)
+```
+
+### One harvest scenario
+
+The biorule plaice template run above was setup such that it runs on a 22% harvest rate on Biomass4+ as can be seen when viewing the plaiceprognosis.dat file:
+```{sh}
+cat 0Base/plaiceprognosis.dat
+```
+
+We also observe that the Btrigger value is set to 5 kt, hopefully low enough such that it is never activated when setting the TAC (test by setting it to a lower value).
+
+Lets load the rmuppet-package that provides some convenient functions that read in the results:
+```{r}
+library(rmuppet)
+d <- 
+  rmuppet:::gather_mcmc("0Base") %>% 
+  mutate(rec = rec / 1e3) %>% 
+  gather(variable, value, -c(iter, year)) %>% 
+  filter(variable != "assCV") %>% 
+  group_by(year, variable) %>% 
+  rmuppet:::calc_percentiles() %>% 
+  ungroup()
+d %>% 
+  ggplot(aes(year)) +
+  facet_grid(variable ~ ., scale = "free_y") +
+  geom_vline(xintercept = 2017.5, colour = "grey") +
+  geom_ribbon(aes(ymin = q05, ymax = q95), fill = "red", alpha = 0.1) +
+  geom_ribbon(aes(ymin = q10, ymax = q90), fill = "red", alpha = 0.2) +
+  geom_ribbon(aes(ymin = q25, ymax = q95), fill = "red", alpha = 0.4) +
+  geom_line(aes(y = q50), colour = "red") +
+  expand_limits(y = 0) +
+  labs(x = NULL, y = NULL)
+```
+
+## Multiple harvest scenarios
+
+To setup a muliple harvest scenario, like testing for different harvest rates we need to setup some loops of the process above. Here the bookeeping is done from within an R-loop.
+```{r, eval = FALSE}
+# overwrite package function - has a bug
+source("R/set_prognosis.R")
+source("R/one_run.R")
+
+ctrlfile  <- paste(basedir, "Files/plaiceprognosis.dat.biorule",sep="/")
+# put this into the function
+file.exists(ctrlfile)
+
+pars <-
+  expand.grid(hr = c(0.001, 0.05, 0.10, seq(0.15, 0.30, by = 0.01)),
+              Btrigger = 0.1,  # set to a very low value
+              rec.rho  = 0.35,
+              w.cv     = 0.08,
+              ass.cv   = 0.2,
+              ass.rho  = 0.7,
+              mW.years = 10)
+cn <- names(pars)
+
+
+
+setwd("0Base")
+res <- list()
+for(i in 1:nrow(pars)) {
+  
+  set_prognosis(infile   = ctrlfile,
+                outfile  = "plaiceprognosis.dat",
+                HarvestRate       = pars$hr[i],
+                AssessmentCorr  = pars$ass.rho[i],
+                AssessmentCV   = pars$ass.cv[i],
+                Btrigger = pars$Btrigger[i],
+                RecrCorr  = pars$rec.rho[i],
+                WeightCV     = pars$w.cv[i],
+                Meanwtyears = pars$mW.years[i])
+  
+  one_run("iceplaice.dat.prog")
+
+  res[[i]] <- gather_results()
+  for(j in 1:length(cn)) res[[i]][,cn[j]] <- pars[i,cn[j]]
+
+}
+
+alldata <-
+  bind_rows(res)
+sumdata <-
+  alldata %>%
+  group_by(hr, Btrigger, rec.rho, mW.years, w.cv, ass.cv, ass.rho) %>%
+  summarise_results(n = 5) %>% 
+  ungroup()
+HCRsettings <- readLines(ctrlfile)
+
+save(list=c("HCRsettings","alldata","sumdata"), file = "HCRrun.rdata")
+save(list=c("HCRsettings","sumdata"), file = "HCRrunsum.rdata")
+
+setwd(basedir)
+```
+
+## Some results
+
+```{r, fig.heigth = 9}
+load("0Base/HCRrun.rdata")
+d <-
+  alldata %>%
+  as_tibble() %>%
+  select(hr, Btrigger, year,
+         catch, ssb, rec, fbar = refF, bio = refbio1) %>%
+  mutate(rec = rec / 1000) %>%
+  gather(variable, value, -c(hr, Btrigger, year)) %>%
+  group_by(hr, Btrigger, year, variable) %>%
+  rmuppet:::calc_percentiles() %>% 
+  ungroup()
+
+d %>%
+  filter(hr %in% c(0.1, 0.15, 0.20, 0.25, 0.30)) %>% 
+  ggplot(aes(year)) +
+  theme_bw() +
+  geom_vline(xintercept = 2018.5, colour = "grey") +
+  geom_ribbon(aes(ymin = q05, ymax = q95),
+              fill = "red", alpha = 0.2) +
+  geom_ribbon(aes(ymin = q10, ymax = q90),
+              fill = "red", alpha = 0.2) +
+  geom_ribbon(aes(ymin = q25, ymax = q75),
+              fill = "red", alpha = 0.2) +
+  geom_line(aes(y = q50), colour = "red") +
+  facet_grid(variable ~ hr, scale = "free_y") +
+  expand_limits(y = 0)
+```
+
+
+```{r}
+sumdata %>% 
+  select(hr, mean = catchmean, median = catchmed, p10 = catch10) %>% 
+  gather(variable, value, -hr) %>% 
+  ggplot(aes(hr, value, colour = variable)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Catch")
+
+Blim <- 
+  fishvice::read_separ("0Base", ".")$rby %>% 
+  filter(year < 2015) %>% 
+  summarise(Blim = min(ssb)) %>% 
+  pull(Blim)
+
+sumdata %>% 
+  select(hr, mean = ssbmean, p05 = ssb05) %>% 
+  gather(variable, value, -hr) %>% 
+  ggplot(aes(hr, value, colour = variable)) +
+  geom_hline(yintercept = Blim) +
+  geom_line() +
+  geom_point() +
+  labs(title = "SSB")
+```
+
+
+
+```{r, echo = FALSE, eval = FALSE}
+# some trial
+library(tidyverse)
+#devtools::install_github("einarhjorleifsson/Muppet_HCR", ref = "trial")
+library(MuppetHCR)
+library(rmuppet)
+
+name <- "0Base"
+# Setup directories with files
+system(paste0("cp -rp ", system.file("Plaice/Files", package = "MuppetHCR"), " ."))
+system(paste0("cp -rp ", system.file("Plaice/HockeyEstAcf", package = "MuppetHCR"), " ", name))
+system(paste0("cp -rp ", system.file("Model", package = "MuppetHCR"), " ."))
+devtools::session_info()
+system(paste0("cp -p Model/muppet.tpl ", name, "/."))
+system(paste0("cp -p Files/plaiceprognosis.dat.biorule ", name, "/plaiceprognosis.dat"))
+```
+
