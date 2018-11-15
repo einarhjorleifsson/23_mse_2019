@@ -1,5 +1,6 @@
 # Data for prognosis
-3     # 3=HCR
+3     # 3: Reference biomass in the start of the assessment year
+      # 4: Reference biomass in the start of the advisory year
 0.13  # WeightCV
 0.5   # WeightCorr
 0.25  # AssessmentCV

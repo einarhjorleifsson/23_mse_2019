@@ -1,10 +1,13 @@
-# Lower and upper value of SSB-recruitment parameters
+# Lower and upper boundary values of SSB-recruitment parameters
 # logRmax logSSBbr logCV logAcf power logprodchange
         8      1.4  -2.5     -3    -1          -1.0  # lower bounds
        12        5     0  -0.35     1           1.0  # upper bounds
 -1.6   # minimum logCV for SSB survey - specific case for mackerel
--3     # default min logCV on normal surveys scaled by multiplier
-# Phase number of estimation
+       #  i.e. if estimated logCV becomes lower than the value specified
+       #  will act as the lower bound and hence used in the assessment
+-3     # default min logCV on survey-at-age multiplier - idea stolen from XSA :-)
+# Phase number for parameter estimation, negative values means never estimated
+#  despite what may be set in
 2      # surveylnqphase
 -1     # surveypowphase
 -1     # surveybiopowphase - if one tunes with a biomass survey

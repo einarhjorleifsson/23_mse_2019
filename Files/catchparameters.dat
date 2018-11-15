@@ -1,1 +1,4 @@
-#Empty file as there is only one selection period.  
+# For plaice: Empty file as there is only one selection period.
+# However if used sepecify the year when new selectivity starts
+#  E.g. if we have three periods like 1985-1995, 1996-2002, 2003- do
+# 1996 2003
